@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Журнал студентов</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+        h1 { color: #2c3e50; }
+        table { border-collapse: collapse; background: white; box-shadow: 0 2px 6px rgba(0,0,0,.1); width: 100%; max-width: 800px; }
+        th, td { padding: 10px 20px; border-bottom: 1px solid #eee; text-align: left; }
+        th { background: #2c3e50; color: white; }
+        tr:hover { background: #f0f7ff; }
+        button { margin: 10px 8px 20px 0; padding: 8px 16px; cursor: pointer; }
+        #error { color: #c0392b; }
+    </style>
+</head>
+<body>
+    <h1>Список студентов</h1>
+    <button onclick="loadStudents()">Загрузить студентов</button>
+    <button onclick="loadGroups()">Загрузить группы</button>
+    <p id="error"></p>
+
+    <table>
+        <thead>
+            <tr id="tableHead"></tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+
+    <script>
+        async function loadStudents() {
+            try {
+                const res = await fetch('/students/all');
+                if (!res.ok) throw new Error('Ошибка загрузки');
+                const data = await res.json();
+
+                document.getElementById('tableHead').innerHTML =
+                    '<th>ID</th><th>Имя</th><th>Фамилия</th><th>Возраст</th><th>GroupId</th>';
+
+                document.getElementById('tableBody').innerHTML = data.map(s => `
+                    <tr>
+                        <td>${s.studentId}</td>
+                        <td>${s.firstName}</td>
+                        <td>${s.lastName}</td>
+                        <td>${s.age}</td>
+                        <td>${s.groupId ?? '-'}</td>
+                    </tr>
+                `).join('');
+
+                document.getElementById('error').textContent = '';
+            } catch (e) {
+                document.getElementById('error').textContent = e.message;
+            }
+        }
+
+        async function loadGroups() {
+            try {
+                const res = await fetch('/groups');
+                if (!res.ok) throw new Error('Ошибка загрузки');
+                const data = await res.json();
+
+                document.getElementById('tableHead').innerHTML =
+                    '<th>ID</th><th>Название группы</th>';
+
+                document.getElementById('tableBody').innerHTML = data.map(g => `
+                    <tr>
+                        <td>${g.groupId}</td>
+                        <td>${g.groupName}</td>
+                    </tr>
+                `).join('');
+
+                document.getElementById('error').textContent = '';
+            } catch (e) {
+                document.getElementById('error').textContent = e.message;
+            }
+        }
+    </script>
+</body>
+</html>
